@@ -37,7 +37,7 @@ Ask any college club how they manage events, and you'll hear the same story: reg
 | Shreshth Sharma | 25BCE11231 |
 | Aryan Singh Patel | 25BCE11138 |
 | Krish Salaria | 25BCE11158 |
-| Harshvardhan Swami | 25BCE111__ |
+| Harshvardhan Swami | 25BCE11122 |
 
 **Course:** Database Management Systems (CSE3001) · **Faculty:** Vijendra Singh Bramhe · VIT Bhopal University
 
