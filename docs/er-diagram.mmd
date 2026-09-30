@@ -1,0 +1,92 @@
+erDiagram
+    DEPARTMENT {
+        int department_id PK
+        string department_name UK
+        string building
+    }
+    STUDENT {
+        int student_id PK
+        string registration_no UK
+        string first_name
+        string last_name
+        string email UK
+        int department_id FK
+        year enrollment_year
+    }
+    FACULTY {
+        int faculty_id PK
+        string faculty_name
+        string email UK
+        int department_id FK
+    }
+    CLUB {
+        int club_id PK
+        string club_name UK
+        string description
+        date founded_on
+        int coordinator_faculty_id FK
+    }
+    CLUB_MEMBERSHIP {
+        int student_id PK, FK
+        int club_id PK, FK
+        string member_role
+        date joined_on
+    }
+    VENUE {
+        int venue_id PK
+        string venue_name UK
+        string building
+        int venue_capacity
+    }
+    EVENT {
+        int event_id PK
+        int club_id FK
+        int venue_id FK
+        string event_name
+        string description
+        datetime start_at
+        datetime end_at
+        int capacity
+        decimal budget_limit
+        string approval_status
+    }
+    EVENT_REGISTRATION {
+        int event_id PK, FK
+        int student_id PK, FK
+        datetime registered_at
+    }
+    ATTENDANCE {
+        int event_id PK, FK
+        int student_id PK, FK
+        string attendance_status
+        datetime checked_in_at
+    }
+    EXPENSE {
+        int expense_id PK
+        int event_id FK
+        date expense_date
+        string category
+        string description
+        decimal amount
+    }
+    FEEDBACK {
+        int feedback_id PK
+        int event_id FK
+        int student_id FK
+        int rating
+        string comments
+        datetime submitted_at
+    }
+
+    DEPARTMENT ||--o{ STUDENT : has
+    DEPARTMENT ||--o{ FACULTY : employs
+    FACULTY ||--o{ CLUB : coordinates
+    STUDENT ||--o{ CLUB_MEMBERSHIP : joins
+    CLUB ||--o{ CLUB_MEMBERSHIP : includes
+    CLUB ||--o{ EVENT : organizes
+    VENUE ||--o{ EVENT : hosts
+    STUDENT ||--o{ EVENT_REGISTRATION : registers
+    EVENT ||--o{ EVENT_REGISTRATION : receives
+    EVENT_REGISTRATION ||--|| ATTENDANCE : creates
+    EVENT ||--o{ EXPENSE : incurs
+    EVENT_REGISTRATION ||--o| FEEDBACK : may_submit
