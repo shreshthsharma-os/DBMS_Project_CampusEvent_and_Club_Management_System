@@ -3,7 +3,6 @@
 ### *One database. Every club, every event, zero chaos.*
 
 [![MySQL](https://img.shields.io/badge/Database-MySQL%2FMariaDB-4479A1?logo=mysql&logoColor=white)](#)
-[![Status](https://img.shields.io/badge/Status-Tested%20%26%20Working-brightgreen)](#)
 [![Normal Form](https://img.shields.io/badge/Normalized-3NF-blue)](#)
 [![License](https://img.shields.io/badge/Use-Academic%20Project-lightgrey)](#)
 
@@ -49,6 +48,8 @@ Ask any college club how they manage events, and you'll hear the same story: reg
 |---|---|
 | 📄 `Campus_Event_Club_Management_System_Report.docx` | The full write-up — objectives, ER diagram, table-by-table breakdown, and how everything was normalized |
 | 🗄️ `campus_event_club_management.sql` | The actual database — run it and get a fully working, pre-filled MySQL database in seconds |
+| 🧭 `docs/er-diagram.mmd` | Editable Mermaid ER diagram for all entities and relationships |
+| 🧪 `tests/constraint_checks.sql` | SQL checks for budget/capacity rules, registration, and automatic attendance |
 | 📘 `README.md` | You are here |
 
 ---
@@ -91,7 +92,7 @@ Anyone can create tables. The interesting part is teaching the *database itself*
 
 - 🚫 **Can't overspend** — try to log an expense that pushes a club past its budget, and MySQL rejects it outright. No app-level check needed.
 - 🙅 **Can't double-book yourself** — the system won't let the same student register twice for the same event.
-- 🪑 **Can't oversell a venue** — registrations stop once a venue hits capacity.
+- 🪑 **Capacity stays bounded** — event registration stops at the event limit, event capacity cannot exceed venue capacity, and a venue cannot host overlapping events.
 - 🤖 **Auto bookkeeping** — the moment a student registers, an attendance record is silently created for them, ready to be marked when they check in.
 
 All of this is done using **triggers**, a **stored procedure**, and **check constraints** — see `campus_event_club_management.sql` for the exact code.
@@ -102,11 +103,11 @@ All of this is done using **triggers**, a **stored procedure**, and **check cons
 
 **You need:** MySQL 8.0+ or MariaDB 10.5+ (nothing else)
 
-```bash
+```sh
 mysql -u root -p < campus_event_club_management.sql
 ```
 
-That's it — one command builds the database, creates every table, and fills it with realistic sample data (clubs, students, events, the works).
+The script creates `campus_event_club_db`, its tables, triggers, procedure, view, and sample data. It does not drop or overwrite an existing database. Run it against a fresh database; to rebuild an existing copy, remove that database yourself first. The script requires privileges to create a database, tables, triggers, routines, and views.
 
 ### 🔍 Play around
 
@@ -127,7 +128,15 @@ ORDER BY members DESC;
 CALL sp_register_for_event(2, 8);
 ```
 
-✅ Every query, trigger, and procedure in this project has been tested end-to-end — including confirming that an over-budget expense actually gets blocked.
+### 🧪 Constraint checks
+
+After loading the schema, run the checks in a MySQL/MariaDB client:
+
+```sh
+mysql -u root -p < tests/constraint_checks.sql
+```
+
+The checks use fixture rows and clean them up. The registration procedure commits its own transaction; its test enrollment is deleted after verification. Expected rejections are caught and checked by SQLSTATE so an unexpectedly successful statement fails the test.
 
 ---
 
