@@ -55,7 +55,21 @@ Ask any college club how they manage events, and you'll hear the same story: reg
 
 ### 🌐 Project website
 
-Open `index.html` locally in a browser to view the static project overview. It links to the GitHub repository and the SQL, report, ER diagram, and constraint-check files. The site is informational: it does not connect to a database or accept registrations. To publish it with GitHub Pages, configure Pages to deploy from the branch containing these files and use the repository root as the publishing folder.
+The static project overview links to the GitHub repository and the SQL, report, ER diagram, and constraint-check files. It is informational: it does not connect to a database or accept registrations.
+
+**Run locally:** from the repository root, start Python's built-in static web server:
+
+```sh
+python -m http.server 8000
+```
+
+Then open <http://localhost:8000> in a browser. Stop the server with `Ctrl+C`.
+
+**Publish on GitHub Pages:** in the repository, open **Settings → Pages**. Under **Build and deployment**, select **Deploy from a branch**, choose `shreshthsharma-os-create-dbms-deliverables` as the branch and `/(root)` as the folder, then select **Save**. After GitHub finishes its first deployment, the site will be available at:
+
+<https://shreshthsharma-os.github.io/DBMS_Project_CampusEvent_and_Club_Management_System/>
+
+The repository is public. A Pages URL is only live after Pages has been enabled and its deployment has completed; check the **Settings → Pages** page for deployment status or URL if GitHub has not published it yet.
 
 ---
 
