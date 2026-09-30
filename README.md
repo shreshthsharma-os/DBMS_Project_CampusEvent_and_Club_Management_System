@@ -50,7 +50,12 @@ Ask any college club how they manage events, and you'll hear the same story: reg
 | 🗄️ `campus_event_club_management.sql` | The actual database — run it and get a fully working, pre-filled MySQL database in seconds |
 | 🧭 `docs/er-diagram.mmd` | Editable Mermaid ER diagram for all entities and relationships |
 | 🧪 `tests/constraint_checks.sql` | SQL checks for budget/capacity rules, registration, and automatic attendance |
+| 🌐 `index.html`, `styles.css`, `script.js` | Responsive project overview website with repository and deliverable links |
 | 📘 `README.md` | You are here |
+
+### 🌐 Project website
+
+Open `index.html` locally in a browser to view the static project overview. It links to the GitHub repository and the SQL, report, ER diagram, and constraint-check files. The site is informational: it does not connect to a database or accept registrations. To publish it with GitHub Pages, configure Pages to deploy from the branch containing these files and use the repository root as the publishing folder.
 
 ---
 
