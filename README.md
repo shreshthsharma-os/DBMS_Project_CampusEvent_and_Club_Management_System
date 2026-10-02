@@ -12,7 +12,7 @@ A relational database (MySQL/MariaDB) for managing college clubs and the events 
 | Shreshth Sharma | 25BCE11231 |
 | Aryan Singh Patel | 25BCE11138 |
 | Krish Salaria | 25BCE11158 |
-| Harshvardhan Swami | 25BCE111__ |
+| Harshvardhan Swami | 25BCE11122 |
 
 ## What This Project Is
 
