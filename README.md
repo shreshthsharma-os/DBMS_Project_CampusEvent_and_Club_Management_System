@@ -127,8 +127,41 @@ The full script has been tested end-to-end on MariaDB with no errors, including 
 
 ## Possible Extensions
 
-- A web front-end (React/Angular) with a REST API over this schema
-- Role-based access control (student / club admin / faculty coordinator / university admin)
-- QR-code based attendance check-in
-- Automated email/SMS notifications on registration and approval
-- A reporting dashboard for club performance and budget utilization
+## Possible Extensions
+
+The current system provides the core database functionality for managing clubs and events. It can be further extended with the following features:
+
+* **Web Front-End** — Develop a responsive web application using React, Angular, or HTML/CSS/JavaScript to provide an easy-to-use interface for students, club coordinators, and faculty.
+
+* **REST API Integration** — Build a backend using Java Spring Boot, Node.js, or Python to connect the database with the web or mobile application.
+
+* **Role-Based Access Control** — Add separate permissions for students, club administrators, faculty coordinators, and university administrators so that each user can access only the required features.
+
+* **QR-Code Attendance** — Generate a unique QR code for each event and allow students to scan it for quick and accurate attendance marking.
+
+* **Online Event Registration** — Allow students to browse upcoming events, register online, cancel registrations, and receive confirmation notifications.
+
+* **Automated Notifications** — Send email or SMS notifications for event registration, event reminders, schedule changes, cancellations, and approval status.
+
+* **Event Approval Workflow** — Introduce a multi-level approval system where events can be submitted by club coordinators and approved by faculty or university administrators.
+
+* **Budget Analytics Dashboard** — Create dashboards showing event budgets, expenses, remaining funds, spending patterns, and club-wise expenditure.
+
+* **Advanced Reporting** — Generate reports for event participation, attendance percentage, club membership, feedback ratings, expenses, and overall club performance.
+
+* **Feedback and Rating Analytics** — Analyze student feedback to identify popular events, average ratings, and areas that need improvement.
+
+* **Venue Availability Management** — Add a calendar-based system that allows administrators to view available venues and prevent scheduling conflicts.
+
+* **Mobile Application** — Develop an Android/iOS application so students can register for events, view schedules, receive notifications, and check their attendance.
+
+* **Audit Logs** — Maintain a history of important database operations such as event creation, registration changes, expense updates, and event approvals for better accountability.
+
+* **Cloud Database Deployment** — Deploy the database on a cloud platform to provide reliable access, scalability, automated backups, and centralized management.
+
+* **Data Backup and Recovery** — Implement scheduled database backups and recovery procedures to protect against accidental data loss.
+
+* **Event Recommendation System** — Use students' previous registrations, club memberships, and interests to recommend relevant upcoming events.
+
+* **Predictive Analytics** — Analyze historical registration and attendance data to estimate expected participation and help clubs plan venues, budgets, and resources more effectively.
+
