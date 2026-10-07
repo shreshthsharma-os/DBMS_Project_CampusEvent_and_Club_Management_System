@@ -1,35 +1,11 @@
-# 🎪 Campus Event & Club Management System
+# Campus Event & Club Management System
 
-### *One database. Every club, every event, zero chaos.*
+A relational database (MySQL/MariaDB) for managing college clubs and the events they run — memberships, event scheduling, registrations, attendance, budgets, and feedback — with the rules enforced by the database itself, not just application code.
 
-[![MySQL](https://img.shields.io/badge/Database-MySQL%2FMariaDB-4479A1?logo=mysql&logoColor=white)](#)
-[![Normal Form](https://img.shields.io/badge/Normalized-3NF-blue)](#)
-[![License](https://img.shields.io/badge/Use-Academic%20Project-lightgrey)](#)
+**Live project site:** https://shreshthsharma-os.github.io/DBMS_Project_CampusEvent_and_Club_Management_System/
+**Course:** Database Management Systems (CSE3001) · **Faculty:** Vijendra Singh Bramhe · VIT Bhopal University
 
----
-
-## 🤔 The Problem
-
-Ask any college club how they manage events, and you'll hear the same story: registrations tracked in a random Google Form, attendance on a paper sheet, budgets in someone's notes app, and feedback that nobody reads twice. Venues get double-booked. Nobody remembers who actually showed up. Expenses quietly blow past the budget.
-
-**This project fixes that with one clean, connected database** — built the proper DBMS way, with rules baked in so bad data literally *can't* get saved.
-
----
-
-## ✨ What It Actually Does
-
-| 🎯 | Feature |
-|---|---|
-| 🏛️ | Tracks every **club**, its **faculty coordinator**, and its **members** (with roles like President, Treasurer, etc.) |
-| 📅 | Schedules **events** at specific **venues** — with an approval status and a budget ceiling |
-| 📝 | Lets students **register** for events and records who actually **attended** |
-| 💰 | Logs every **expense** — and the database *automatically rejects* any expense that would blow the budget |
-| ⭐ | Collects **feedback & ratings** after each event |
-| 🔒 | Enforces every rule above using real constraints, not just "hoping the app remembers to check" |
-
----
-
-## 👥 The Team
+## Team
 
 | Name | Registration No. |
 |---|---|
@@ -38,11 +14,9 @@ Ask any college club how they manage events, and you'll hear the same story: reg
 | Krish Salaria | 25BCE11158 |
 | Harshvardhan Swami | 25BCE11122 |
 
-**Course:** Database Management Systems (CSE3001) · **Faculty:** Vijendra Singh Bramhe · VIT Bhopal University
+## What This Project Is :
 
----
-
-## 📁 What's in This Repo
+Clubs typically track events across spreadsheets, Google Forms, and chat groups. That leads to predictable problems: venues get double-booked, students register twice for the same event, nobody has an accurate attendance record, and event spending isn't checked against the approved budget until it's too late.
 
 | File | What it is |
 |---|---|
@@ -53,8 +27,9 @@ Ask any college club how they manage events, and you'll hear the same story: reg
 | 🌐 `index.html`, `styles.css`, `script.js` | Responsive project overview website with repository and deliverable links |
 | 🐍 `app.py`, `templates/index.html`, `requirements.txt` | Flask event listing, student sign-in, registration, cancellation, and profile application |
 | 📘 `README.md` | You are here |
+This project replaces that with a single normalized database where those problems are prevented by the schema itself — a duplicate registration is rejected, an over-budget expense is rejected, and an over-capacity venue booking is rejected, all at the point of insertion.
 
-### 🌐 Project website
+## What's in This Repo :
 
 The static project overview links to the GitHub repository and the SQL, report, ER diagram, and constraint-check files. It is informational: it does not connect to a database or accept registrations.
 
@@ -71,17 +46,23 @@ Then open <http://localhost:8000> in a browser. Stop the server with `Ctrl+C`.
 <https://shreshthsharma-os.github.io/DBMS_Project_CampusEvent_and_Club_Management_System/>
 
 The repository is public. A Pages URL is only live after Pages has been enabled and its deployment has completed; check the **Settings → Pages** page for deployment status or URL if GitHub has not published it yet.
+| File | Description |
+|---|---|
+| `Campus_Event_Club_Management_System_Report.docx` | Full project report: objectives, ER diagram, data dictionary, normalization explanation, implementation notes |
+| `campus_event_club_management.sql` | The complete MySQL script — schema, sample data, views, triggers, functions, procedures, and demonstration queries |
+| `README.md` | This file |
+| [Live site](https://shreshthsharma-os.github.io/DBMS_Project_CampusEvent_and_Club_Management_System/) | A hosted overview page with a project walkthrough and direct downloads for the report, SQL file, and ER diagram |
 
----
+## Database Schema
 
-## 🧩 How the Data Fits Together
+The system has **11 tables**, split into two groups:
 
-Think of it as **11 building blocks**, split into two kinds:
+**Core entities** — the actual things being tracked:
+`DEPARTMENT`, `STUDENT`, `FACULTY`, `CLUB`, `VENUE`, `EVENT`, `ATTENDANCE`, `EXPENSE`, `FEEDBACK`
 
-- **Core entities** — the "things" in the system: Department, Student, Faculty, Club, Venue, Event, Expense, Feedback, Attendance
-- **Connector tables** — quietly link two entities that have a many-to-many relationship (a student can join *many* clubs, and a club has *many* students):
-  - `CLUB_MEMBERSHIP` → connects Students ↔ Clubs
-  - `EVENT_REGISTRATION` → connects Students ↔ Events
+**Junction tables** — resolve the two many-to-many relationships:
+- `CLUB_MEMBERSHIP` — connects `STUDENT` ↔ `CLUB` (a student may join various types of multiple clubs; a club has many students)
+- `EVENT_REGISTRATION` — connects `STUDENT` ↔ `EVENT` (a student can register for many events; an event has many registrants)
 
 ```mermaid
 erDiagram
@@ -100,63 +81,107 @@ erDiagram
     STUDENT ||--o{ FEEDBACK : gives
 ```
 
-*(GitHub renders this diagram automatically — the full labeled ER diagram with every column is in the report.)*
+The full column-level ER diagram is in the report; an editable Mermaid source file is also linked from the live site.
 
-Every table only stores what actually belongs to it — a student's department is never copy-pasted everywhere, it's just looked up when needed. That's what "**normalized to 3NF**" means in plain English: **no duplicate data, no contradictions, no mess.**
+**Normalization:** the schema is in Third Normal Form (3NF) — no column is duplicated across tables, and no attribute depends on anything other than its table's primary key. For example, a student's department name is never stored in the `STUDENT` table directly; only `dept_id` is stored, and the name is looked up from `DEPARTMENT` when needed.
 
----
+## Database Objects
 
-## 🧠 The Smart Parts
+Beyond the base tables, the script includes:
 
-Anyone can create tables. The interesting part is teaching the *database itself* to enforce the rules:
+**Views**
+- `vw_upcoming_events` — approved/proposed events with club and venue details
+- `vw_club_expenditure` — total spend per club across all its events
 
-- 🚫 **Can't overspend** — try to log an expense that pushes a club past its budget, and MySQL rejects it outright. No app-level check needed.
-- 🙅 **Can't double-book yourself** — the system won't let the same student register twice for the same event.
-- 🪑 **Capacity stays bounded** — event registration stops at the event limit, event capacity cannot exceed venue capacity, and a venue cannot host overlapping events.
-- 🤖 **Auto bookkeeping** — the moment a student registers, an attendance record is silently created for them, ready to be marked when they check in.
+**Stored Procedure**
+- `sp_register_for_event(event_id, student_id)` — registers a student for an event inside a transaction; rejects duplicate registrations and venue-capacity overflow, with rollback on failure
 
-All of this is done using **triggers**, a **stored procedure**, and **check constraints** — see `campus_event_club_management.sql` for the exact code.
+**Function**
+- `fn_club_event_count(club_id)` — returns the number of events a club has organized
 
----
+**Triggers**
+- `trg_expense_budget_check` — rejects any expense that would push an event's total spending past its allocated budget
+- `trg_create_attendance_row` — automatically creates a blank attendance record when a student registers for an event
 
-## 🚀 Try It Yourself
+**Indexes** on frequently filtered/joined columns (`event_date`, `club_id`, etc.)
+
+## PL/SQL Concepts (Module 4)
+
+The course's PL/SQL module is written for Oracle syntax. MySQL has an equivalent procedural language (SQL/PSM) that covers the same concepts. Section 6 of the SQL script implements each one against this project's own tables:
+
+| Concept | MySQL Syntax | Implementation |
+|---|---|---|
+| Variables & control structures | `IF … ELSEIF … ELSE` | `fn_feedback_grade` — grades a rating as Excellent/Good/Average/Needs Improvement |
+| Explicit cursors | `DECLARE CURSOR`, `OPEN`/`FETCH`/`CLOSE` | `sp_generate_budget_report` — loops through every event and classifies its spending |
+| Exception handling (`NO_DATA_FOUND`) | `DECLARE CONTINUE HANDLER FOR NOT FOUND` | `sp_get_student_email` — returns a clean error instead of failing on an unknown student ID |
+| `WHILE` loops | `WHILE … DO … END WHILE` | `fn_working_days_until_event` — counts weekdays remaining before an event |
 
 **You need for the database:** MySQL 8.0+ or MariaDB 10.5+. The Flask website additionally uses Python 3.9+.
+Run `CALL sp_generate_budget_report();` after loading the script to see this in action — it labels every event as *Under Budget*, *On Track*, *Near Limit*, or *Over Budget*, computed live from the cursor loop.
 
-```sh
+## Setup
+
+**Requirements:** MySQL 8.0+ or MariaDB 10.5+
+
+```bash
 mysql -u root -p < campus_event_club_management.sql
 ```
 
 The SQL dump creates `campus_event_club_db`, its tables, triggers, procedure, view, and sample data. It **drops and recreates the project tables**, replacing existing project data; back up anything you need before running it. The script requires privileges to create a database, tables, triggers, routines, and views.
+This creates a database named `campus_event_club_db`, fully populated with sample departments, students, faculty, clubs, venues, events, registrations, expenses, and feedback.
 
-### 🔍 Play around
+## Example Queries
 
 ```sql
 USE campus_event_club_db;
 
--- What's coming up?
+-- Upcoming events with club & venue info
 SELECT * FROM vw_upcoming_events;
 
--- Which club has the most members?
+-- Clubs ranked by membership size
 SELECT club_name, COUNT(*) AS members
 FROM CLUB_MEMBERSHIP
 JOIN CLUB USING (club_id)
 GROUP BY club_name
 ORDER BY members DESC;
 
--- Register a student for an event — safely, with all checks applied
+-- Register a student for an event (transaction-safe)
 CALL sp_register_for_event(2, 8);
 ```
 
-### 🧪 Constraint checks
+The full script has been tested end-to-end on MariaDB with no errors, including a verified check that the budget trigger correctly rejects an over-budget expense.
 
-After loading the schema, run the checks in a MySQL/MariaDB client:
+## Possible Extensions
 
-```sh
-mysql -u root -p < tests/constraint_checks.sql
-```
+## Possible Extensions
 
-The checks use fixture rows and clean them up. The registration procedure commits its own transaction; its test enrollment is deleted after verification. Expected rejections are caught and checked by SQLSTATE so an unexpectedly successful statement fails the test.
+The current system provides the core database functionality for managing clubs and events. It can be further extended with the following features:
+
+* **Web Front-End** — Develop a responsive web application using React, Angular, or HTML/CSS/JavaScript to provide an easy-to-use interface for students, club coordinators, and faculty.
+
+* **REST API Integration** — Build a backend using Java Spring Boot, Node.js, or Python to connect the database with the web or mobile application.
+
+* **Role-Based Access Control** — Add separate permissions for students, club administrators, faculty coordinators, and university administrators so that each user can access only the required features.
+
+* **QR-Code Attendance** — Generate a unique QR code for each event and allow students to scan it for quick and accurate attendance marking.
+
+* **Online Event Registration** — Allow students to browse upcoming events, register online, cancel registrations, and receive confirmation notifications.
+
+* **Automated Notifications** — Send email or SMS notifications for event registration, event reminders, schedule changes, cancellations, and approval status.
+
+* **Event Approval Workflow** — Introduce a multi-level approval system where events can be submitted by club coordinators and approved by faculty or university administrators.
+
+* **Budget Analytics Dashboard** — Create dashboards showing event budgets, expenses, remaining funds, spending patterns, and club-wise expenditure.
+
+* **Advanced Reporting** — Generate reports for event participation, attendance percentage, club membership, feedback ratings, expenses, and overall club performance.
+
+* **Feedback and Rating Analytics** — Analyze student feedback to identify popular events, average ratings, and areas that need improvement.
+
+* **Venue Availability Management** — Add a calendar-based system that allows administrators to view available venues and prevent scheduling conflicts.
+
+* **Mobile Application** — Develop an Android/iOS application so students can register for events, view schedules, receive notifications, and check their attendance.
+
+* **Audit Logs** — Maintain a history of important database operations such as event creation, registration changes, expense updates, and event approvals for better accountability.
 
 ### 🐍 Run the interactive Flask app
 
@@ -196,15 +221,11 @@ In MySQL Workbench, update the chosen student's `password_hash` with the printed
 This is an academic project starter, not a production-hardened identity service. Before public deployment, add CSRF protection, account provisioning and recovery, rate limiting, secure session-cookie settings, and operational monitoring.
 
 ---
+* **Cloud Database Deployment** — Deploy the database on a cloud platform to provide reliable access, scalability, automated backups, and centralized management.
 
-## 🔮 Where This Could Go Next
+* **Data Backup and Recovery** — Implement scheduled database backups and recovery procedures to protect against accidental data loss.
 
-- 🌐 A real front-end (React/Angular) talking to this database over an API
-- 🔑 Login system with roles — student, club admin, faculty, university admin
-- 📱 QR-code check-ins that update attendance live
-- 📧 Auto-emails when a student registers or an event gets approved
-- 📊 A dashboard showing which clubs are thriving and where the budget's going
+* **Event Recommendation System** — Use students' previous registrations, club memberships, and interests to recommend relevant upcoming events.
 
----
+* **Predictive Analytics** — Analyze historical registration and attendance data to estimate expected participation and help clubs plan venues, budgets, and resources more effectively.
 
-<p align="center"><i>Built as a DBMS mini-project to show that good database design isn't just about storing data — it's about making bad data impossible.</i></p>
