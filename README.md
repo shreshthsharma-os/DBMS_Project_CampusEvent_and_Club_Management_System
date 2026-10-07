@@ -14,13 +14,13 @@ A relational database (MySQL/MariaDB) for managing college clubs and the events 
 | Krish Salaria | 25BCE11158 |
 | Harshvardhan Swami | 25BCE11122 |
 
-## What This Project Is
+## What This Project Is :
 
 Clubs typically track events across spreadsheets, Google Forms, and chat groups. That leads to predictable problems: venues get double-booked, students register twice for the same event, nobody has an accurate attendance record, and event spending isn't checked against the approved budget until it's too late.
 
 This project replaces that with a single normalized database where those problems are prevented by the schema itself — a duplicate registration is rejected, an over-budget expense is rejected, and an over-capacity venue booking is rejected, all at the point of insertion.
 
-## What's in This Repo
+## What's in This Repo :
 
 | File | Description |
 |---|---|
@@ -37,7 +37,7 @@ The system has **11 tables**, split into two groups:
 `DEPARTMENT`, `STUDENT`, `FACULTY`, `CLUB`, `VENUE`, `EVENT`, `ATTENDANCE`, `EXPENSE`, `FEEDBACK`
 
 **Junction tables** — resolve the two many-to-many relationships:
-- `CLUB_MEMBERSHIP` — connects `STUDENT` ↔ `CLUB` (a student can join many clubs; a club has many students)
+- `CLUB_MEMBERSHIP` — connects `STUDENT` ↔ `CLUB` (a student may join various types of multiple clubs; a club has many students)
 - `EVENT_REGISTRATION` — connects `STUDENT` ↔ `EVENT` (a student can register for many events; an event has many registrants)
 
 ```mermaid
