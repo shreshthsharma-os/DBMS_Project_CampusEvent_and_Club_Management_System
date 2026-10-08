@@ -151,7 +151,6 @@ CALL sp_register_for_event(2, 8);
 
 The full script has been tested end-to-end on MariaDB with no errors, including a verified check that the budget trigger correctly rejects an over-budget expense.
 
-## Possible Extensions
 
 ## Possible Extensions
 
