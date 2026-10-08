@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Events</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <style>
+        /* 1. CSS Variables & Theme Definitions */
+        :root {
+            /* Boutique Webflow Theme (snig.digital inspired) */
+            --bg-color: #f7f5f2;
+            --surface-color: rgba(255, 255, 255, 0.6);
+            --text-main: #1a1a1a;
+            --text-muted: #737373;
+            --primary: #1a1a1a;      /* Bold Black */
+            --accent: #ff4d00;       /* Vibrant Orange */
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.06);
+            --focus-ring: 0 0 0 3px rgba(255, 77, 0, 0.2);
+            --blur: blur(20px);
+
+            /* Status Colors */
+            --success: #009951;
+            --warning: #e68a00;
+            --danger: #cc3300;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f0f0f;
+            --surface-color: rgba(26, 26, 26, 0.6);
+            --text-main: #f2f2f2;
+            --text-muted: #a6a6a6;
+            --primary: #ffffff;
+            --accent: #ff6622;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Gradient Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 77, 0, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 20%, rgba(0, 153, 81, 0.03) 0%, transparent 30%);
+            z-index: -2;
+            animation: bgRotate 30s linear infinite;
+            pointer-events: none;
+        }
+        [data-theme="dark"] body::before {
+            background: radial-gradient(circle at 50% 50%, rgba(255, 77, 0, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 20%, rgba(0, 153, 81, 0.05) 0%, transparent 30%);
+        }
+        @keyframes bgRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Noise Overlay */
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.04"/%3E%3C/svg%3E');
+            z-index: -1; pointer-events: none;
+        }
+
+        /* Custom Cursor */
+        .custom-cursor {
+            width: 20px; height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background 0.2s;
+            mix-blend-mode: difference;
+        }
+        .custom-cursor.hover { width: 60px; height: 60px; background: #fff; }
+
+        h1, h2, h3, h4 { font-family: 'Lora', serif; font-weight: 600; }
+
+        /* 2. Navigation */
+        nav {
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background-color 0.4s ease;
+        }
+
+        .logo { font-size: 24px; color: var(--primary); display: flex; align-items: center; gap: 12px; font-family: 'Lora', serif; font-weight: 600;}
+
+        .nav-actions { display: flex; align-items: center; gap: 24px; }
+
+        .theme-toggle {
+            background: none; border: none; font-size: 20px; color: var(--text-main);
+            cursor: pointer; transition: transform 0.2s, color 0.4s;
+        }
+        .theme-toggle:hover { transform: scale(1.1); color: var(--accent); }
+        .theme-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 50%; }
+
+        /* 3. Hero Section */
+        .hero {
+            padding: 80px 20px 40px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero h1 { font-size: 48px; margin-bottom: 16px; color: var(--text-main); }
+        .hero p { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; }
+
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .search-container input {
+            width: 100%;
+            padding: 16px 24px 16px 48px;
+            border-radius: 32px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            outline: none;
+            transition: box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+        }
+        .search-container input:focus {
+            box-shadow: var(--focus-ring);
+            border-color: var(--accent);
+        }
+        .search-container i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        /* 4. Main Layout & Grid */
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 32px;
+        }
+
+        /* 5. Cards & Hover Effects */
+        .event-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, background-color 0.4s, border-color 0.4s;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s forwards;
+        }
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .event-club {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 600; color: var(--accent); margin-bottom: 12px;
+        }
+
+        .event-card h3 { font-size: 24px; margin-bottom: 16px; line-height: 1.3; }
+
+        .event-meta {
+            display: flex; align-items: flex-start; gap: 12px;
+            margin-bottom: 12px; font-size: 14px; color: var(--text-muted);
+        }
+        .event-meta i { margin-top: 4px; color: var(--primary); }
+
+        /* Progress Bar */
+        .capacity-section { margin-top: 24px; margin-bottom: 24px; }
+        .capacity-labels {
+            display: flex; justify-content: space-between;
+            font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted);
+        }
+        .progress-track {
+            height: 6px; background: var(--border-color);
+            border-radius: 4px; overflow: hidden;
+            transition: background-color 0.4s;
+        }
+        .progress-fill {
+            height: 100%; background: var(--primary);
+            border-radius: 4px; transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .progress-fill.warning { background: var(--warning); }
+        .progress-fill.danger { background: var(--danger); }
+
+        /* Registration Form */
+        .register-form {
+            margin-top: auto;
+            display: flex; gap: 12px;
+        }
+        .register-form input {
+            flex: 1; padding: 12px 16px;
+            border: 1px solid var(--border-color); width: 100%;
+            border-radius: 8px; background: var(--bg-color); color: var(--text-main);
+            font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, background-color 0.4s;
+        }
+        .register-form input:focus { border-color: var(--accent); box-shadow: var(--focus-ring); }
+
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 8px;
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            white-space: nowrap;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: #22463b; transform: scale(1.02); }
+        [data-theme="dark"] .btn-primary:hover:not(:disabled) { background: #96d1bb; }
+        .btn-primary:disabled { background: var(--border-color); color: var(--text-muted); cursor: not-allowed; }
+
+        /* Skeletons */
+        .skeleton {
+            background: linear-gradient(90deg, var(--border-color) 25%, var(--bg-color) 50%, var(--border-color) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes loading { to { background-position: -200% 0; } }
+
+        .fun-fact {
+            background: var(--bg-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-main);
+            border-left: 3px solid var(--accent);
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        .fun-fact i { color: var(--accent); margin-right: 6px; }
+
+        .profile-header {
+            text-align: center; margin-bottom: 40px; padding: 40px;
+            background: var(--surface-color); border-radius: 16px; border: 1px solid var(--border-color);
+        }
+        .profile-avatar {
+            width: 80px; height: 80px; border-radius: 50%; background: var(--primary);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: bold; margin: 0 auto 16px; font-family: 'Lora', serif;
+        }
+        .profile-stats {
+            display: flex; justify-content: center; gap: 40px; margin-top: 24px;
+        }
+        .stat-box { text-align: center; }
+        .stat-num { font-size: 24px; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            nav { padding: 16px 24px; }
+            .events-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="custom-cursor" id="custom-cursor"></div>
+<nav>
+    <div class="logo" onclick="showHome()" style="cursor:pointer;">
+        <i class="fa-solid fa-leaf"></i> <span>Campus</span>
+    </div>
+    <div class="nav-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
+        </button>
+        <span id="nav-auth"></span>
+    </div>
+</nav>
+
+<div id="view-home">
+    <section class="hero">
+        <h1>Discover Your Campus</h1>
+        <p>Join student-led clubs, attend workshops, and connect with your community.</p>
+        <div class="search-container">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by event or club..." oninput="filterEvents()">
+        </div>
+    </section>
+
+    <main>
+        <div id="events-container" class="events-grid">
+            <!-- Skeletons loaded initially -->
+        </div>
+    </main>
+</div>
+
+<div id="view-profile" style="display:none; max-width:800px; margin: 40px auto; padding: 0 24px;">
+    <div class="profile-header">
+        <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+        <h2 id="profile-name" style="font-size:32px;">...</h2>
+        <p id="profile-email" style="color:var(--text-muted); margin-bottom: 24px;">...</p>
+
+        <div class="profile-stats">
+            <div class="stat-box">
+                <div class="stat-num" id="stat-registered">0</div>
+                <div class="stat-label">Registered</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="stat-attended">0</div>
+                <div class="stat-label">Attended</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="stat-clubs">0</div>
+                <div class="stat-label">Clubs</div>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom: 24px;">My Registrations</h2>
+    <div id="my-registrations-list"></div>
+</div>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    let allEvents = [];
+    let user = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initTheme();
+        checkAuth();
+        initCursor();
+    });
+
+    /* Custom Cursor */
+    function initCursor() {
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        document.addEventListener('mouseover', e => {
+            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('.event-card') || e.target.tagName === 'INPUT') {
+                cursor.classList.add('hover');
+            } else {
+                cursor.classList.remove('hover');
+            }
+        });
+    }
+
+    async function checkAuth() {
+        try {
+            const res = await fetch('/api/me');
+            const data = await res.json();
+            if(data.authenticated) {
+                user = data;
+                document.getElementById('nav-auth').innerHTML = `
+                    <button class="btn" onclick="showProfile()"><i class="fa-solid fa-user"></i> Profile</button>
+                    <button class="btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+                `;
+            } else {
+                user = null;
+                document.getElementById('nav-auth').innerHTML = `
+                    <button class="btn btn-primary" onclick="showLogin()"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+                `;
+            }
+        } catch (e) { console.error(e); }
+
+        showHome();
+    }
+
+    function showHome() {
+        document.getElementById('view-home').style.display = 'block';
+        document.getElementById('view-profile').style.display = 'none';
+        renderSkeletons();
+        fetchEvents();
+    }
+
+    /* Auth Actions */
+    function showLogin() {
+        const email = prompt("Enter your student email:");
+        if(!email) return;
+        const pwd = prompt("Enter your password:");
+        if(!pwd) return;
+
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email: email, password: pwd})
+        }).then(res => res.json()).then(data => {
+            if(data.error) showToast(data.error, "error");
+            else { showToast(data.message, "success"); checkAuth(); }
+        });
+    }
+
+    function logout() {
+        fetch('/api/logout', {method: 'POST'}).then(() => {
+            showToast("Logged out", "success");
+            checkAuth();
+        });
+    }
+
+    /* Theme Toggle */
+    function initTheme() {
+        const saved = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+        updateThemeIcon(saved);
+    }
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateThemeIcon(next);
+    }
+    function updateThemeIcon(theme) {
+        const icon = document.getElementById('theme-icon');
+        icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+
+    /* Fetch Events */
+    async function fetchEvents() {
+        try {
+            const response = await fetch('/api/events');
+            if (!response.ok) throw new Error("Failed to fetch events.");
+            const events = await response.json();
+            if (events.error) { showToast(events.error, "error"); return; }
+            allEvents = events;
+            renderEvents(allEvents);
+        } catch (error) {
+            document.getElementById('events-container').innerHTML = `
+                <div style="grid-column: 1/-1; text-align:center; padding: 40px;">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size:48px; color:var(--danger); margin-bottom:16px;"></i>
+                    <h2 style="font-family:'Lora',serif;">Connection Failed</h2>
+                    <p style="color:var(--text-muted)">Please check your database connection.</p>
+                </div>`;
+        }
+    }
+
+    /* Skeletons */
+    function renderSkeletons() {
+        const container = document.getElementById('events-container');
+        container.innerHTML = '';
+        for(let i=0; i<6; i++) {
+            container.innerHTML += `
+                <div class="event-card" style="animation:none; opacity:1; transform:none;">
+                    <div class="skeleton" style="height:14px; width:30%; margin-bottom:16px;"></div>
+                    <div class="skeleton" style="height:28px; width:80%; margin-bottom:24px;"></div>
+                    <div class="skeleton" style="height:16px; width:60%; margin-bottom:12px;"></div>
+                    <div class="skeleton" style="height:16px; width:50%; margin-bottom:32px;"></div>
+                    <div class="skeleton" style="height:6px; width:100%; margin-bottom:24px;"></div>
+                    <div class="skeleton" style="height:48px; width:100%; border-radius:8px;"></div>
+                </div>
+            `;
+        }
+    }
+
+    /* Render Cards */
+    function renderEvents(events) {
+        const container = document.getElementById('events-container');
+        container.innerHTML = '';
+
+        if (events.length === 0) {
+            container.innerHTML = `
+                <div style="grid-column: 1/-1; text-align:center; padding: 60px;">
+                    <h2 style="color:var(--text-muted); font-weight:400;">No events found</h2>
+                </div>`;
+            return;
+        }
+
+        events.forEach((event, index) => {
+            const card = document.createElement('div');
+            card.className = 'event-card';
+            card.style.animationDelay = `${index * 0.1}s`;
+
+            const startDate = new Date(event.start_at);
+            const dateStr = startDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            const timeStr = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit' });
+
+            const percentFull = Math.min(100, (event.registered_count / event.capacity) * 100);
+            const isFull = event.seats_remaining <= 0;
+
+            let barClass = '';
+            if (percentFull >= 90) barClass = 'danger';
+            else if (percentFull >= 75) barClass = 'warning';
+
+            let actionBtn = `<button class="btn btn-primary" onclick="showLogin()">Login to Join</button>`;
+            if (user) {
+                if (event.is_registered) {
+                    actionBtn = `<button class="btn" disabled style="background:var(--success); color:white;"><i class="fa-solid fa-check"></i> Registered</button>`;
+                } else {
+                    actionBtn = `<button class="btn btn-primary" onclick="register(${event.event_id})" ${isFull ? 'disabled' : ''}>
+                        <i class="fa-solid ${isFull ? 'fa-lock' : 'fa-arrow-right'}"></i> ${isFull ? 'Full' : 'Join'}
+                    </button>`;
+                }
+            }
+
+            card.innerHTML = `
+                <div class="event-club">${escapeHtml(event.club_name)}</div>
+                <h3>${escapeHtml(event.event_name)}</h3>
+
+                <div class="event-meta">
+                    <i class="fa-regular fa-clock"></i>
+                    <div><strong>${dateStr}</strong><br>${timeStr}</div>
+                </div>
+                <div class="event-meta">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div><strong>${escapeHtml(event.venue_name)}</strong><br>${escapeHtml(event.venue_building)}</div>
+                </div>
+
+                ${event.fun_fact ? `<div class="fun-fact"><i class="fa-solid fa-lightbulb"></i> <strong>Did you know?</strong><br>${escapeHtml(event.fun_fact)}</div>` : ''}
+
+                <div class="capacity-section">
+                    <div class="capacity-labels">
+                        <span>${event.registered_count} joined</span>
+                        <span>${isFull ? 'Full' : event.seats_remaining + ' left'}</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill ${barClass}" style="width: 0%;" data-target="${percentFull}"></div>
+                    </div>
+                </div>
+
+                <div class="register-form" style="justify-content: flex-end;">
+                    ${actionBtn}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        setTimeout(() => {
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                bar.style.width = bar.getAttribute('data-target') + '%';
+            });
+        }, 100);
+    }
+
+    function filterEvents() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allEvents.filter(e =>
+            e.event_name.toLowerCase().includes(query) ||
+            e.club_name.toLowerCase().includes(query)
+        );
+        renderEvents(filtered);
+    }
+
+    async function register(eventId) {
+        if(!user) return showLogin();
+        try {
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event_id: eventId })
+            });
+            const data = await res.json();
+            if (res.ok) { showToast("Successfully registered!", "success"); fetchEvents(); }
+            else { showToast(data.error, "error"); }
+        } catch (err) { showToast("Network error", "error"); }
+    }
+
+    /* Profile & Registrations */
+    async function showProfile() {
+        document.getElementById('view-home').style.display = 'none';
+        document.getElementById('view-profile').style.display = 'block';
+
+        const res = await fetch('/api/profile');
+        const data = await res.json();
+
+        const info = data.user;
+        document.getElementById('profile-name').textContent = `${info.first_name} ${info.last_name}`;
+        document.getElementById('profile-email').textContent = `${info.email} | ${info.department_name}`;
+
+        document.getElementById('stat-registered').innerText = data.stats.events_registered;
+        document.getElementById('stat-attended').innerText = data.stats.events_attended;
+        document.getElementById('stat-clubs').innerText = data.stats.clubs_joined;
+
+        // Render My Registrations
+        const regList = document.getElementById('my-registrations-list');
+        regList.innerHTML = '';
+        if(data.registrations.length === 0) {
+            regList.innerHTML = `<p style="text-align:center; padding: 40px; color:var(--text-muted);">You haven't joined any events yet.</p>`;
+        } else {
+            data.registrations.forEach(reg => {
+                let statusColor = reg.status === 'Completed' ? 'var(--text-muted)' : (reg.status === 'Upcoming' ? 'var(--primary)' : 'var(--warning)');
+                regList.innerHTML += `
+                    <div class="event-card" style="margin-bottom: 20px;">
+                        <span style="position:absolute; top:20px; right:20px; color:${statusColor}; font-weight:bold;">${reg.status}</span>
+                        <h3>${escapeHtml(reg.event_name)} <small>by ${escapeHtml(reg.club_name)}</small></h3>
+                        <p><i class="fa-regular fa-clock"></i> ${new Date(reg.start_at).toLocaleString()}</p>
+                        ${reg.fun_fact ? `<div class="fun-fact" style="margin-top:10px;"><i class="fa-solid fa-lightbulb"></i> ${escapeHtml(reg.fun_fact)}</div>` : ''}
+                        ${reg.status === 'Upcoming' ? `<div style="margin-top:15px; text-align:right;"><button class="btn" style="background:var(--danger); color:white;" onclick="cancelRegistration(${reg.event_id})"><i class="fa-solid fa-xmark"></i> Cancel</button></div>` : ''}
+                    </div>
+                `;
+            });
+        }
+    }
+
+    async function cancelRegistration(eventId) {
+        if(!confirm("Are you sure you want to cancel this registration?")) return;
+        try {
+            const res = await fetch('/api/cancel', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({event_id: eventId})
+            });
+            const data = await res.json();
+            if(res.ok) { showToast("Cancelled successfully", "success"); showProfile(); }
+            else { showToast(data.error, "error"); }
+        } catch(e) { showToast("Error cancelling", "error"); }
+    }
+
+    function showToast(text, type) {
+        let bg = "var(--text-main)";
+        if (type === "error") bg = "var(--danger)";
+        if (type === "warning") bg = "var(--warning)";
+        if (type === "success") bg = "var(--success)";
+        Toastify({
+            text: text, duration: 3500, gravity: "bottom", position: "center",
+            style: { background: bg, color: "#fff", borderRadius: "8px", fontFamily: "'Inter', sans-serif", boxShadow: "var(--shadow-md)" }
+        }).showToast();
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[character]);
+    }
+</script>
+
+</body>
+</html>

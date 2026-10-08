@@ -18,10 +18,34 @@ A relational database (MySQL/MariaDB) for managing college clubs and the events 
 
 Clubs typically track events across spreadsheets, Google Forms, and chat groups. That leads to predictable problems: venues get double-booked, students register twice for the same event, nobody has an accurate attendance record, and event spending isn't checked against the approved budget until it's too late.
 
+| File | What it is |
+|---|---|
+| 📄 `Campus_Event_Club_Management_System_Report.docx` | The full write-up — objectives, ER diagram, table-by-table breakdown, and how everything was normalized |
+| 🗄️ `campus_event_club_management.sql` | The MySQL 8 schema and sample database, including app fields and stored objects |
+| 🧭 `docs/er-diagram.mmd` | Editable Mermaid ER diagram for all entities and relationships |
+| 🧪 `tests/constraint_checks.sql` | SQL checks for budget/capacity rules, registration, and automatic attendance |
+| 🌐 `index.html`, `styles.css`, `script.js` | Responsive project overview website with repository and deliverable links |
+| 🐍 `app.py`, `templates/index.html`, `requirements.txt` | Flask event listing, student sign-in, registration, cancellation, and profile application |
+| 📘 `README.md` | You are here |
 This project replaces that with a single normalized database where those problems are prevented by the schema itself — a duplicate registration is rejected, an over-budget expense is rejected, and an over-capacity venue booking is rejected, all at the point of insertion.
 
 ## What's in This Repo :
 
+The static project overview links to the GitHub repository and the SQL, report, ER diagram, and constraint-check files. It is informational: it does not connect to a database or accept registrations.
+
+**Run locally:** from the repository root, start Python's built-in static web server:
+
+```sh
+python -m http.server 8000
+```
+
+Then open <http://localhost:8000> in a browser. Stop the server with `Ctrl+C`.
+
+**Publish on GitHub Pages:** in the repository, open **Settings → Pages**. Under **Build and deployment**, select **Deploy from a branch**, choose `shreshthsharma-os-create-dbms-deliverables` as the branch and `/(root)` as the folder, then select **Save**. After GitHub finishes its first deployment, the site will be available at:
+
+<https://shreshthsharma-os.github.io/DBMS_Project_CampusEvent_and_Club_Management_System/>
+
+The repository is public. A Pages URL is only live after Pages has been enabled and its deployment has completed; check the **Settings → Pages** page for deployment status or URL if GitHub has not published it yet.
 | File | Description |
 |---|---|
 | `Campus_Event_Club_Management_System_Report.docx` | Full project report: objectives, ER diagram, data dictionary, normalization explanation, implementation notes |
@@ -92,6 +116,7 @@ The course's PL/SQL module is written for Oracle syntax. MySQL has an equivalent
 | Exception handling (`NO_DATA_FOUND`) | `DECLARE CONTINUE HANDLER FOR NOT FOUND` | `sp_get_student_email` — returns a clean error instead of failing on an unknown student ID |
 | `WHILE` loops | `WHILE … DO … END WHILE` | `fn_working_days_until_event` — counts weekdays remaining before an event |
 
+**You need for the database:** MySQL 8.0+ or MariaDB 10.5+. The Flask website additionally uses Python 3.9+.
 Run `CALL sp_generate_budget_report();` after loading the script to see this in action — it labels every event as *Under Budget*, *On Track*, *Near Limit*, or *Over Budget*, computed live from the cursor loop.
 
 ## Setup
@@ -102,6 +127,7 @@ Run `CALL sp_generate_budget_report();` after loading the script to see this in 
 mysql -u root -p < campus_event_club_management.sql
 ```
 
+The SQL dump creates `campus_event_club_db`, its tables, triggers, procedure, view, and sample data. It **drops and recreates the project tables**, replacing existing project data; back up anything you need before running it. The script requires privileges to create a database, tables, triggers, routines, and views.
 This creates a database named `campus_event_club_db`, fully populated with sample departments, students, faculty, clubs, venues, events, registrations, expenses, and feedback.
 
 ## Example Queries
@@ -157,6 +183,44 @@ The current system provides the core database functionality for managing clubs a
 
 * **Audit Logs** — Maintain a history of important database operations such as event creation, registration changes, expense updates, and event approvals for better accountability.
 
+### 🐍 Run the interactive Flask app
+
+The Flask app uses the same MySQL database and provides event browsing, student login, registration/cancellation, and profile views. It is separate from the static GitHub Pages project overview: **GitHub Pages cannot run Flask or connect to MySQL**. Run the app locally or deploy it to a Python-capable host with a reachable MySQL server.
+
+1. Install Python 3.9+ and MySQL 8.0+, then load the schema above. This SQL dump is generated by MySQL 8 and uses MySQL-specific export syntax.
+2. From the repository root, create a virtual environment and install the Python dependencies:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+3. Set the app's configuration in the same PowerShell window. Use your local MySQL account details; do not commit real credentials or `.env` files:
+
+```powershell
+$env:FLASK_SECRET_KEY = (py -c "import secrets; print(secrets.token_hex(32))")
+$env:DB_HOST = "127.0.0.1"
+$env:DB_PORT = "3306"
+$env:DB_NAME = "campus_event_club_db"
+$env:DB_USER = "root"
+$env:DB_PASSWORD = Read-Host "MySQL password"
+python app.py
+```
+
+Open <http://127.0.0.1:5000>. The app reads the `FLASK_SECRET_KEY`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` environment variables. Set a stable, randomly generated secret key and use HTTPS with `FLASK_COOKIE_SECURE=1` when deploying publicly.
+
+The sample student rows start with a placeholder password hash, so they cannot sign in until an administrator assigns a password. Generate a Werkzeug hash locally with:
+
+```powershell
+python -c "from getpass import getpass; from werkzeug.security import generate_password_hash; print(generate_password_hash(getpass()))"
+```
+
+In MySQL Workbench, update the chosen student's `password_hash` with the printed hash (and match the student's seeded email on the login page). Do not store the plaintext password in SQL, source control, or shared logs.
+
+This is an academic project starter, not a production-hardened identity service. Before public deployment, add CSRF protection, account provisioning and recovery, rate limiting, secure session-cookie settings, and operational monitoring.
+
+---
 * **Cloud Database Deployment** — Deploy the database on a cloud platform to provide reliable access, scalability, automated backups, and centralized management.
 
 * **Data Backup and Recovery** — Implement scheduled database backups and recovery procedures to protect against accidental data loss.
